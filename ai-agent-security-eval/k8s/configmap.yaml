@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-agent-security-eval-config
+data:
+  APP_HOST: "0.0.0.0"
+  APP_PORT: "8000"
+  APP_LOG_LEVEL: "INFO"
+  APP_AUTO_SEED: "true"
+  APP_AGENT_NAME: "internal_copilot"
+  APP_DEFAULT_RUN_LIMIT: "100"
+  APP_DATA_DIR: "/app/data"
+  APP_DOCS_DIR: "/app/data/docs"
+  APP_DB_PATH: "/app/data/app.db"
+

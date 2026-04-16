@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-agent-security-eval
+  labels:
+    app: ai-agent-security-eval
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-agent-security-eval
+  template:
+    metadata:
+      labels:
+        app: ai-agent-security-eval
+    spec:
+      containers:
+        - name: api
+          image: ai-agent-security-eval:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ai-agent-security-eval-config
+          env:
+            - name: OPTIONAL_LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-agent-security-eval-secrets
+                  key: OPTIONAL_LLM_API_KEY
+                  optional: true
+          volumeMounts:
+            - name: app-data
+              mountPath: /app/data
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: app-data
+          emptyDir: {}
+
