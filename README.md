@@ -1,6 +1,6 @@
 # AI Agent Security Evaluation
 
-`AI Agent Security Evaluation` is a local-first FastAPI service that simulates an enterprise internal copilot and demonstrates policy enforcement, tracing, and adversarial testing in a small, interview-friendly package.
+`AI Agent Security Evaluation` is a local-first FastAPI service that simulates an enterprise internal copilot and demonstrates policy enforcement, tracing, and adversarial testing.
 
 The deployment story stays intentionally simple:
 
