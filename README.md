@@ -307,22 +307,3 @@ Inspect the deployment:
 ```bash
 kubectl get deploy,svc,cronjob,pods
 ```
-
-## Safe To Publish Notes
-
-This repo is designed to be safe to publish publicly, but keep these local-only files out of GitHub:
-
-- `.git/`
-- `.venv/`
-- `.env`
-- `data/app.db`
-- `data/eval_report.json`
-
-If you upload files through the GitHub browser instead of `git push`, remember that `.gitignore` does not protect you. Upload only the project files you actually want in the repo.
-
-## Notes
-
-- The deployment is intentionally interview-friendly: one app container, one service, one CronJob, one ConfigMap, one example Secret, one NetworkPolicy.
-- The Kubernetes manifests use `emptyDir` for demo simplicity. If you want durable shared state across pod restarts or between the API and eval jobs, replace that with a `PersistentVolumeClaim`.
-- There is still no auth system; `user_role` remains simulated input for local security testing.
-- The SQL policy parser is intentionally narrow and optimized for this demo's allowed query shapes.
