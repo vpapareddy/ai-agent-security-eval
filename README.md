@@ -11,7 +11,7 @@ The project stays intentionally simple:
 - scheduled evals via CronJob
 - env-driven configuration
 - standard-library logging for the API
-- a Rich-powered terminal demo for the showcase flow
+- a Rich-powered terminal game for the showcase flow
 
 ## What It Does
 
@@ -39,7 +39,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Run the guided terminal showcase:
+Run the interactive terminal game:
 
 ```bash
 python -m scripts.cli demo
@@ -49,13 +49,24 @@ python -m scripts.cli demo
 
 - local environment and data path summary
 - demo data seeding with visible progress
-- safe and blocked agent scenarios
-- tools considered vs tools executed
-- policy decisions and guardrail reasons
-- trace IDs and stored run summaries
-- a failure/remediation teaching section for all five risk categories
+- a 5-round interactive terminal game
+- one attack round per major risk category
+- randomized numbered countermeasure choices
+- score, health-bar, and combo updates after each decision
+- immediate feedback with trace clues and remediation
+- Enter-to-continue beats between scene, threat, result, and next round
 
-The terminal demo uses the same real orchestrator, policy layer, storage, and FastAPI app that the API uses. It is not a mocked presentation layer. The failure/remediation teaching section is explanatory, based on the current threat model and eval categories, and the real eval suite still passes by default.
+The terminal game is an educational wrapper around the real threat model, trace surfaces, and guardrails in this repo. It teaches attacks and defenses without introducing a separate backend simulation.
+
+## Legacy Walkthrough
+
+If you want the older scripted showcase, run the legacy step-by-step walkthrough:
+
+```bash
+python -m scripts.cli walkthrough
+```
+
+The walkthrough uses the same real orchestrator, policy layer, storage, and FastAPI app that the API uses. Its failure/remediation teaching section is explanatory, based on the current threat model and eval categories, and the real eval suite still passes by default.
 
 ## Run The API
 
@@ -94,6 +105,7 @@ python -m scripts.run_evals
 
 - `python -m scripts.cli doctor`
 - `python -m scripts.cli demo`
+- `python -m scripts.cli walkthrough`
 - `python -m scripts.cli serve`
 - `python -m scripts.cli evals`
 
