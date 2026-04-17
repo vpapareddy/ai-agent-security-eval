@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+from typing import Callable, Optional
 
 from fastapi.testclient import TestClient
 
@@ -68,9 +69,12 @@ SCENARIOS = [
 ]
 
 
-def main() -> int:
+def run_evaluations(
+    progress_callback: Optional[Callable[[dict, int, int], None]] = None,
+    log_level_override: Optional[str] = None,
+) -> tuple[dict, Path]:
     settings = get_settings()
-    configure_logging(settings.log_level)
+    configure_logging(log_level_override or settings.log_level)
     logger.info("Starting local evaluation harness report_dir=%s", settings.data_dir)
     seed_project(db_path=settings.db_path, docs_dir=settings.docs_dir)
 
@@ -79,7 +83,8 @@ def main() -> int:
     report_path = settings.data_dir / "eval_report.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
-    for scenario in SCENARIOS:
+    total = len(SCENARIOS)
+    for index, scenario in enumerate(SCENARIOS, start=1):
         logger.info("Running eval scenario id=%s category=%s", scenario["id"], scenario["category"])
         response = client.post("/run-task", json=scenario["payload"])
         body = response.json()
@@ -111,9 +116,11 @@ def main() -> int:
             "Completed eval scenario id=%s passed=%s run_id=%s summary=%s",
             scenario["id"],
             passed,
-            body["run_id"],
-            summary,
-        )
+                body["run_id"],
+                summary,
+            )
+        if progress_callback is not None:
+            progress_callback(result, index, total)
 
     report = {
         "total": len(results),
@@ -123,6 +130,11 @@ def main() -> int:
     }
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     logger.info("Finished eval harness passed=%s total=%s report_path=%s", report["passed"], report["total"], report_path)
+    return report, report_path
+
+
+def render_plain_report(report: dict, report_path: Path) -> None:
+    results = report["results"]
 
     print("AI Agent Security Evaluation")
     print("============================")
@@ -144,6 +156,11 @@ def main() -> int:
         )
     )
     print("Report written to {path}".format(path=report_path))
+
+
+def main() -> int:
+    report, report_path = run_evaluations()
+    render_plain_report(report, report_path)
 
     return 0 if report["failed"] == 0 else 1
 

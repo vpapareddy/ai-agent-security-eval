@@ -1,8 +1,8 @@
 # AI Agent Security Evaluation
 
-`AI Agent Security Evaluation` is a local-first FastAPI service that simulates an enterprise internal copilot and demonstrates policy enforcement, tracing, and adversarial testing.
+`AI Agent Security Evaluation` is a local-first FastAPI service that simulates an enterprise internal copilot and demonstrates policy enforcement, tracing, and adversarial testing in a small, interview-friendly package.
 
-The deployment story stays intentionally simple:
+The project stays intentionally simple:
 
 - Python + FastAPI + SQLite
 - one application container
@@ -10,7 +10,8 @@ The deployment story stays intentionally simple:
 - internal-only service
 - scheduled evals via CronJob
 - env-driven configuration
-- standard-library logging only
+- standard-library logging for the API
+- a Rich-powered terminal demo for the showcase flow
 
 ## What It Does
 
@@ -21,36 +22,7 @@ The deployment story stays intentionally simple:
 - exposes traces and findings for inspection
 - runs a small adversarial eval suite locally or in a CronJob
 
-## Project Structure
-
-```text
-app/main.py
-app/config.py
-app/logging_config.py
-agent/orchestrator.py
-agent/policy.py
-tools/docs_search.py
-tools/sql_readonly.py
-tools/draft_action.py
-storage/db.py
-storage/models.py
-api/routes_agent.py
-api/routes_system.py
-scripts/seed_data.py
-scripts/run_server.py
-scripts/run_evals.py
-k8s/
-threat-model.md
-```
-
-## Requirements
-
-- Python 3.9+
-- `pip`
-- Docker optional
-- Kubernetes optional, such as `kind` or `minikube`
-
-## Quick Start
+## Fastest Path
 
 Clone the repo and move into the project:
 
@@ -59,44 +31,71 @@ git clone https://github.com/your-user/ai-agent-security-eval.git
 cd ai-agent-security-eval
 ```
 
-Create a local environment and seed demo data:
+Create a local environment and install dependencies:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python -m scripts.seed_data
 ```
 
-Start the API:
+Run the guided terminal showcase:
+
+```bash
+python -m scripts.cli demo
+```
+
+### What You’ll See
+
+- local environment and data path summary
+- demo data seeding with visible progress
+- safe and blocked agent scenarios
+- tools considered vs tools executed
+- policy decisions and guardrail reasons
+- trace IDs and stored run summaries
+- a failure/remediation teaching section for all five risk categories
+
+The terminal demo uses the same real orchestrator, policy layer, storage, and FastAPI app that the API uses. It is not a mocked presentation layer. The failure/remediation teaching section is explanatory, based on the current threat model and eval categories, and the real eval suite still passes by default.
+
+## Run The API
+
+Start the service with the friendlier CLI wrapper:
+
+```bash
+python -m scripts.cli serve
+```
+
+Then open:
+
+- [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+
+You can also keep using the original entrypoint:
 
 ```bash
 python -m scripts.run_server
 ```
 
-The API is available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+## Run Adversarial Evals
 
-## Common Local Commands
-
-Run tests:
+Run the richer terminal summary:
 
 ```bash
-source .venv/bin/activate
-pytest -q
+python -m scripts.cli evals
 ```
 
-Run adversarial evals:
+The original script still works too:
 
 ```bash
-source .venv/bin/activate
 python -m scripts.run_evals
 ```
 
-Inspect health:
+## Local CLI Commands
 
-```bash
-curl http://127.0.0.1:8000/health
-```
+- `python -m scripts.cli doctor`
+- `python -m scripts.cli demo`
+- `python -m scripts.cli serve`
+- `python -m scripts.cli evals`
 
 ## API Endpoints
 
@@ -137,6 +136,20 @@ Inspect findings:
 curl http://127.0.0.1:8000/findings
 ```
 
+## Inspect The Traces
+
+Useful inspection paths:
+
+- `GET /runs/{id}` for a full run trace
+- `GET /findings` for blocked tool calls and eval failures
+- container logs for startup, request handling, tool use, policy decisions, and eval execution
+
+Local generated files:
+
+- SQLite database: `data/app.db`
+- eval report: `data/eval_report.json`
+- seeded docs: `data/docs/`
+
 ## Configuration
 
 The app has safe local defaults, but environment-dependent settings are externalized through env vars.
@@ -159,6 +172,36 @@ Common env vars:
 - `OPTIONAL_LLM_API_KEY` optional placeholder for a future adapter
 
 `APP_AUTO_SEED=true` is useful in Docker or Kubernetes because it seeds demo data when storage is empty without wiping existing runs on every restart.
+
+## Project Structure
+
+```text
+app/main.py
+app/config.py
+app/logging_config.py
+agent/orchestrator.py
+agent/policy.py
+tools/docs_search.py
+tools/sql_readonly.py
+tools/draft_action.py
+storage/db.py
+storage/models.py
+api/routes_agent.py
+api/routes_system.py
+scripts/cli.py
+scripts/seed_data.py
+scripts/run_server.py
+scripts/run_evals.py
+k8s/
+threat-model.md
+```
+
+## Requirements
+
+- Python 3.9+
+- `pip`
+- Docker optional
+- Kubernetes optional, such as `kind` or `minikube`
 
 ## Docker
 
@@ -254,20 +297,6 @@ Inspect the deployment:
 ```bash
 kubectl get deploy,svc,cronjob,pods
 ```
-
-## How To Inspect Results
-
-Local generated files:
-
-- SQLite database: `data/app.db`
-- eval report: `data/eval_report.json`
-- seeded docs: `data/docs/`
-
-Useful inspection paths:
-
-- `GET /runs/{id}` for a full run trace
-- `GET /findings` for blocked tool calls and eval failures
-- container logs for startup, request handling, tool use, policy decisions, and eval execution
 
 ## Safe To Publish Notes
 
