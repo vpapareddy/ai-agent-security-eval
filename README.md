@@ -2,6 +2,7 @@
 
 `AI Agent Security Evaluation` is a local-first FastAPI service that simulates an enterprise internal copilot and demonstrates policy enforcement, tracing, and adversarial testing.
 
+
 - Python + FastAPI + SQLite
 - one application container
 - plain Kubernetes manifests
